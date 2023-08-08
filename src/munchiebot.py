@@ -10,7 +10,6 @@ info_layout()
 
 TOKEN = os.getenv("TOKEN") #Add your own token here
 CHANNEL_ID = os.getenv("CHANNEL_ID")  #Add your own channel ID here
-#bot = commands.Bot(command_prefix = '!', intents = discord.Intents.all())
 bot = PersistentViewBot()
 
 def run_bot():

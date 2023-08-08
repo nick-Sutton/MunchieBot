@@ -12,7 +12,7 @@ class FreeGamesCog(commands.Cog):
     async def FreeGameCog(self, interaction: discord.Interaction):
         embeds = retrieve_current_games()
         view = PaginationView(embeds)
-        await interaction.response.send_message("@everyone",embed=view._initial, view=view, ephemeral=False)
+        await interaction.response.send_message(embed=view._initial, view=view, ephemeral=False)
 
 async def setup(bot:commands.Bot) -> None:
     await bot.add_cog(FreeGamesCog(bot))

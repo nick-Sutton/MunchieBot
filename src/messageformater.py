@@ -1,6 +1,5 @@
 import discord
-from epicSC import Epic_Scraper
-from epicSC import Epic_Json
+from epicSC import Epic_Scraper, Epic_Json
 import calendar
 
 freeGameData = Epic_Json()
