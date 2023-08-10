@@ -54,7 +54,7 @@ class PersistentViewBot(commands.Bot):
         intents = discord.Intents().all()
         intents.message_content = True
         super().__init__(command_prefix=commands.when_mentioned_or('!'), intents=intents)
-        self.cogs_List = ["cogs.freegamesCog", "cogs.globalCog", "cogs.helpCog"]
+        self.cogs_List = ["cogs.freegamesCog", "cogs.globalCog", "cogs.helpCog", "epicSC"]
         #self.embeds = embeds
 
     async def setup_hook(self) -> None:

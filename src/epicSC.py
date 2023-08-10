@@ -1,61 +1,96 @@
-from playwright.sync_api import sync_playwright
-import json, requests
+from playwright.async_api import async_playwright
+import json, aiohttp, aiofiles, discord
+from discord.ext import commands, tasks
+from discord import app_commands
 
-def Epic_Scraper():
-    try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=False, slow_mo=50)
-            page = browser.new_page()
-            page.goto("https://store.epicgames.com/en-US/free-games")
-            page.wait_for_selector("data-testid=group-swiper-slider-titlebar")
-            
-            freeGameSection = page.locator("xpath=//*[contains(@class, 'css-2u323')]")
-            titlesList =  []
-            statusList =  []
-            gameDict =  {}
+class BackgroundTasks(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.Epic_Scraper.start()
+        self.Epic_Json.start()
+    
+    def cog_unload(self) -> None:
+        self.Epic_Scraper.stop()
+        self.Epic_Json.stop()
 
-            freeGameTitles = freeGameSection.locator("data-testid=direction-auto").count()
-            for i in range(freeGameTitles):
-                titles = freeGameSection.locator("data-testid=direction-auto").nth(i).text_content()
-                titlesList.append(titles)
+    @tasks.loop(hours=12)
+    async def Epic_Scraper(self):
+        try:
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=False, slow_mo=50)
+                page = await browser.new_page()
+                await page.goto("https://store.epicgames.com/en-US/free-games")
+                await page.wait_for_selector("data-testid=group-swiper-slider-titlebar")
+                
+                freeGameSection = page.locator("xpath=//*[contains(@class, 'css-2u323')]")
+                titlesList =  []
+                statusList =  []
+                gameDict =  {}
 
-            freeGameStatus = freeGameSection.locator("div[class=css-1avc5a3]").count()
-            for i in range(freeGameStatus):
-                status = freeGameSection.locator("div[class=css-1avc5a3]").nth(i).text_content()
-                statusList.append(status)
+                freeGameTitles = await freeGameSection.locator("data-testid=direction-auto").count()
+                for i in range(freeGameTitles):
+                    titles = await freeGameSection.locator("data-testid=direction-auto").nth(i).text_content()
+                    titlesList.append(titles)
 
-            print(statusList)
-            print(titlesList)
-            browser.close()
+                freeGameStatus = await freeGameSection.locator("div[class=css-1avc5a3]").count()
+                for i in range(freeGameStatus):
+                    status = await freeGameSection.locator("div[class=css-1avc5a3]").nth(i).text_content()
+                    statusList.append(status)
 
-            for titlesList, statusList in zip(titlesList, statusList):
-                gameDict[titlesList] = statusList
+                print(f"{titlesList} and {statusList} list were successfully created.")
+                await browser.close()
 
-            print(gameDict)
+                for titlesList, statusList in zip(titlesList, statusList):
+                    gameDict[titlesList] = statusList
 
-            freeNowList =  []
-            comingSoonList=  []
+                print(f"gameDict{gameDict} was successfully created.")
 
-            for freegameTitles, freeGameStatus in gameDict.items():
-                if freeGameStatus == 'Free Now':
-                    freeNowList.append(freegameTitles)
-                elif freeGameStatus == 'Coming Soon':
-                    comingSoonList.append(freegameTitles)
+                freeNowList =  []
+                comingSoonList=  []
 
-            print(freeNowList)
-            print(comingSoonList)
-        return freeNowList, comingSoonList
-    except Exception as e:
-        print(e)
-        return [], []
+                for freegameTitles, freeGameStatus in gameDict.items():
+                    if freeGameStatus == 'Free Now':
+                        freeNowList.append(freegameTitles)
+                    elif freeGameStatus == 'Coming Soon':
+                        comingSoonList.append(freegameTitles)
 
-def Epic_Json():
-    try:
-        response = requests.get("https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US")
-        freeGameData = json.loads(response.text)
+            print(f"{freeNowList} and {comingSoonList} lists were successfully created.")
+
+            freeNowFile = "freeNow.txt"
+            async with aiofiles.open(freeNowFile, "w") as file:
+                for line in freeNowList:
+                    await file.write(f"{line}\n")
+                    
+                print("JSON data was successfully dumped.")
+
+        except Exception as e:
+            print(e)
+
+    @tasks.loop(hours=12)
+    async def Epic_Json(self):
+        try:
+            async with aiohttp.ClientSession() as session:
+                response = await session.get("https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=US&allowCountries=US")
+                responseText = await response.text()
+                freeGameJson = json.loads(responseText)
+
+                epicJson = "free_games.json"
+                async with aiofiles.open(epicJson, "w") as file:
+                    await file.write(json.dumps(freeGameJson, indent=4))
+                    
+                print("JSON data was successfully dumped.")
+
+        except Exception as e:
+            print(e)
+
+    @app_commands.command(name="start", description="Starts Munchies automatic site checking")
+    async def loop_start(self, interaction: discord.Integration):
+        self.Epic_Scraper.start()
+        self.Epic_Json.start()
+    @app_commands.command(name="stop", description="Stops Munchies automatic site checking")
+    async def loop_stop(self, interaction: discord.Integration):
+        self.Epic_Scraper.stop()
+        self.Epic_Json.stop()
         
-        #pretty_json = json.dumps(freeGameData, indent=2)
-        #print(pretty_json)
-        return freeGameData
-    except Exception as e:
-        print(e)
+async def setup(bot:commands.Bot) -> None:
+    await bot.add_cog(BackgroundTasks(bot))

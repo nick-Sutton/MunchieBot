@@ -2,8 +2,7 @@
 import discord, os
 from dotenv import load_dotenv
 from consoleheader import logo_format, info_layout
-from views import PersistentViewBot
-from messageformater import retrieve_current_games
+from discordviews import PersistentViewBot
 load_dotenv()
 logo_format()
 info_layout()
@@ -21,6 +20,5 @@ def run_bot():
                 print(f"synced {len(synced)} command(s)")
         except Exception as e:
                 print(e)
-        print(retrieve_current_games())
 
     bot.run(TOKEN)
