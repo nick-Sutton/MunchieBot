@@ -1,7 +1,7 @@
 from playwright.async_api import async_playwright
-import json, aiohttp, aiofiles, discord
+import json, aiohttp, aiofiles, time, os, calendar, discord
 from discord.ext import commands, tasks
-from discord import app_commands
+from discordviews import PaginationView
 
 class BackgroundTasks(commands.Cog):
     def __init__(self, bot):
@@ -19,7 +19,8 @@ class BackgroundTasks(commands.Cog):
             async with async_playwright() as p:
                 browser = await p.chromium.launch(headless=False, slow_mo=50)
                 page = await browser.new_page()
-                await page.goto("https://store.epicgames.com/en-US/free-games")
+                await page.goto("https://store.epicgames.com/en-US/free-games", timeout=0)
+                time.sleep(5)
                 await page.wait_for_selector("data-testid=group-swiper-slider-titlebar")
                 
                 freeGameSection = page.locator("xpath=//*[contains(@class, 'css-2u323')]")
@@ -37,13 +38,10 @@ class BackgroundTasks(commands.Cog):
                     status = await freeGameSection.locator("div[class=css-1avc5a3]").nth(i).text_content()
                     statusList.append(status)
 
-                print(f"{titlesList} and {statusList} list were successfully created.")
                 await browser.close()
 
                 for titlesList, statusList in zip(titlesList, statusList):
                     gameDict[titlesList] = statusList
-
-                print(f"gameDict{gameDict} was successfully created.")
 
                 freeNowList =  []
                 comingSoonList=  []
@@ -54,14 +52,58 @@ class BackgroundTasks(commands.Cog):
                     elif freeGameStatus == 'Coming Soon':
                         comingSoonList.append(freegameTitles)
 
-            print(f"{freeNowList} and {comingSoonList} lists were successfully created.")
+            current_time = time.strftime("%H:%M:%S", time.localtime())
+            print(f"\033[1m{current_time}\033[0m freeNowList and comingSoonList lists were successfully created.")
 
             freeNowFile = "freeNow.txt"
-            async with aiofiles.open(freeNowFile, "w") as file:
-                for line in freeNowList:
-                    await file.write(f"{line}\n")
-                    
-                print("JSON data was successfully dumped.")
+            async with aiofiles.open("freeNow.txt", "r") as file:
+                freeNowtxt = [line.strip() for line in await file.readlines()]
+                if freeNowtxt != freeNowList:
+                    async with aiofiles.open(freeNowFile, "w") as file:
+                            for line in freeNowList:
+                                await file.write(f"{line}\n")
+                    print(f"\033[1m{current_time}\033[0m Site data has changed.")
+                    print(f"\033[1m{current_time}\033[0m Site data was successfully dumped.")
+
+                    async with aiofiles.open("freeNow.txt", "r") as file:
+                        freeNowAuto = [line.strip() for line in await file.readlines()]
+                        print(freeNowList)
+
+                    async with aiofiles.open("free_games.json", "r") as file:
+                        getData = await file.read()
+                        jsonAuto = json.loads(getData)
+
+                    #Compares the Json dict and freeGamesList inorder to find the games located in the freeGameList
+                    messages_List = []
+                    for games in jsonAuto["data"]["Catalog"]["searchStore"]["elements"]:
+                        if games["title"] in freeNowAuto:
+                            #Creates an individual embed discord message for each game in the freeGamesList
+                            messageFormat = discord.Embed( 
+                                colour = discord.Colour.pink(),
+                                title = games["title"],
+                                description = games["description"],
+                            )
+
+                            messageFormat.set_author(name="Free On EpicGames[x]",url="https://store.epicgames.com/en-US/")
+                            messageFormat.add_field(name="",value="", inline=False)
+                            messageFormat.add_field(name="Original Price:", value=games["price"]["totalPrice"]["fmtPrice"]["originalPrice"], inline=True)
+                            messageFormat.add_field(name="Sale Ends:", value=time)
+                            messageFormat.set_thumbnail(url=games["keyImages"][2]["url"])
+
+                            messages_List.append(messageFormat)
+
+                    embeds = messages_List
+                    view = PaginationView(embeds)
+
+                    CHANNEL_ID = os.getenv("CHANNEL_ID")
+                    message_channel = await self.bot.fetch_channel(CHANNEL_ID)
+                    await message_channel.send("@everyone", embed=view._initial, view=view)
+
+                else:
+                    async with aiofiles.open(freeNowFile, "w") as file:
+                        for line in freeNowList:
+                            await file.write(f"{line}\n")
+                    print(f"\033[1m{current_time}\033[0m Site data was successfully dumped.")
 
         except Exception as e:
             print(e)
@@ -78,19 +120,11 @@ class BackgroundTasks(commands.Cog):
                 async with aiofiles.open(epicJson, "w") as file:
                     await file.write(json.dumps(freeGameJson, indent=4))
                     
-                print("JSON data was successfully dumped.")
+                current_time = time.strftime("%H:%M:%S", time.localtime())
+                print(f"\033[1m{current_time}\033[0m JSON data was successfully dumped.")
 
         except Exception as e:
             print(e)
-
-    @app_commands.command(name="start", description="Starts Munchies automatic site checking")
-    async def loop_start(self, interaction: discord.Integration):
-        self.Epic_Scraper.start()
-        self.Epic_Json.start()
-    @app_commands.command(name="stop", description="Stops Munchies automatic site checking")
-    async def loop_stop(self, interaction: discord.Integration):
-        self.Epic_Scraper.stop()
-        self.Epic_Json.stop()
         
 async def setup(bot:commands.Bot) -> None:
     await bot.add_cog(BackgroundTasks(bot))
