@@ -1,5 +1,5 @@
 from playwright.async_api import async_playwright
-import json, aiohttp, aiofiles, time, os, calendar, discord
+import json, aiohttp, aiofiles, os, calendar, discord, time
 from discord.ext import commands, tasks
 from discordviews import PaginationView
 
@@ -72,6 +72,25 @@ class BackgroundTasks(commands.Cog):
                     async with aiofiles.open("free_games.json", "r") as file:
                         getData = await file.read()
                         jsonAuto = json.loads(getData)
+                
+                    for endTimes in jsonAuto["data"]["Catalog"]["searchStore"]["elements"]:
+                        if endTimes["title"] in freeNowAuto[0]:
+                            #breaks the json date foramt into Month/Day/Year format
+                            gameDates = endTimes["promotions"]["promotionalOffers"][0]["promotionalOffers"][0]["endDate"]
+                            gameYear = (gameDates[0:4])
+                            gameDay = (gameDates[8:10])
+
+                            #Determines if the Month value is single digit or multiple digits
+                            if int(gameDates[6]) == 0:
+                                gameMonth = int(gameDates[7])
+                            else:
+                                gameMonth = int(gameDates[6:7])
+
+                            #Changes the month int to the calender month
+                            gameMonthName = calendar.month_name[gameMonth]
+                    
+                            #Creates a string containing Month Day, Year
+                            formatedDate = str(f"{gameMonthName} {gameDay}, {gameYear}")
 
                     #Compares the Json dict and freeGamesList inorder to find the games located in the freeGameList
                     messages_List = []
@@ -87,7 +106,7 @@ class BackgroundTasks(commands.Cog):
                             messageFormat.set_author(name="Free On EpicGames[x]",url="https://store.epicgames.com/en-US/")
                             messageFormat.add_field(name="",value="", inline=False)
                             messageFormat.add_field(name="Original Price:", value=games["price"]["totalPrice"]["fmtPrice"]["originalPrice"], inline=True)
-                            messageFormat.add_field(name="Sale Ends:", value=time)
+                            messageFormat.add_field(name="Sale Ends:", value=formatedDate)
                             messageFormat.set_thumbnail(url=games["keyImages"][2]["url"])
 
                             messages_List.append(messageFormat)

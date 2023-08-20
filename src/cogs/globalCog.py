@@ -1,4 +1,4 @@
-import discord, aiofiles, json, calendar, os
+import discord, aiofiles, json, calendar
 from discord.ext import commands
 from discord import app_commands
 from discordviews import PaginationView
