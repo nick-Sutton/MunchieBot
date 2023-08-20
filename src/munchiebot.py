@@ -3,8 +3,6 @@ import discord, os, aiofiles
 from dotenv import load_dotenv
 from consoleheader import logo_format, info_layout
 from discordviews import PersistentViewBot
-from cogs.globalCog import GlobalCog
-from epicSC import BackgroundTasks
 load_dotenv()
 logo_format()
 info_layout()
