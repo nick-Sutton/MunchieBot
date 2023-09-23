@@ -1,6 +1,5 @@
 # MunchieBot
-MunchieBot is a Discord bot that updates your server on the latest free games on Epic Games.
-
+MunchieBot uses PlayWright and the discord.py API to scrape the Epic Games Store and update your server when a new free game is available.
 To use the bot, add a token and channel ID in the munchiebot.py file found in the src folder.
 
 # Example Implementation
