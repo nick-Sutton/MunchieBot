@@ -55,8 +55,8 @@ class BackgroundTasks(commands.Cog):
             current_time = time.strftime("%H:%M:%S", time.localtime())
             print(f"\033[1m{current_time}\033[0m freeNowList and comingSoonList lists were successfully created.")
 
-            async with aiofiles.open("freeNow.txt", "x") as file:
-                freeNowFile = "freeNow.txt"
+            freeNowFile = os.getcwd() + "/freeNow.txt"
+            await aiofiles.open(freeNowFile, "w")
 
             async with aiofiles.open(freeNowFile, "r") as file:
                 freeNowtxt = [line.strip() for line in await file.readlines()]
