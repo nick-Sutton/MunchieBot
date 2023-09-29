@@ -49,15 +49,13 @@ class PaginationView(discord.ui.View):
         def initial(self) -> discord.Embed:
             return self._initial
         
-class PersistentViewBot(commands.Bot):
+class ViewBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents().all()
         intents.message_content = True
         super().__init__(command_prefix=commands.when_mentioned_or('!'), intents=intents)
         self.cogs_List = ["cogs.freegamesCog", "cogs.globalCog", "cogs.helpCog", "epicSC"]
-        #self.embeds = embeds
 
     async def setup_hook(self) -> None:
-        #await self.add_view(PaginationView(embeds))
         for ext in self.cogs_List:
             await self.load_extension(ext)

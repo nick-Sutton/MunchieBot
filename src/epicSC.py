@@ -1,7 +1,7 @@
 from playwright.async_api import async_playwright
 import json, aiohttp, aiofiles, os, calendar, discord, time
 from discord.ext import commands, tasks
-from discordviews import PaginationView
+from view import PaginationView
 
 class BackgroundTasks(commands.Cog):
     def __init__(self, bot):
@@ -55,11 +55,13 @@ class BackgroundTasks(commands.Cog):
             current_time = time.strftime("%H:%M:%S", time.localtime())
             print(f"\033[1m{current_time}\033[0m freeNowList and comingSoonList lists were successfully created.")
 
-            freeNowFile = "freeNow.txt"
-            async with aiofiles.open("freeNow.txt", "r") as file:
+            async with aiofiles.open("freeNow.txt", "x") as file:
+                freeNowFile = "freeNow.txt"
+
+            async with aiofiles.open(freeNowFile, "r") as file:
                 freeNowtxt = [line.strip() for line in await file.readlines()]
                 if freeNowtxt != freeNowList:
-                    async with aiofiles.open(freeNowFile, "w") as file:
+                    async with aiofiles.open(freeNowFile, "w+") as file:
                             for line in freeNowList:
                                 await file.write(f"{line}\n")
                     print(f"\033[1m{current_time}\033[0m Site data has changed.")
@@ -72,6 +74,9 @@ class BackgroundTasks(commands.Cog):
                     async with aiofiles.open("free_games.json", "r") as file:
                         getData = await file.read()
                         jsonAuto = json.loads(getData)
+
+                    freeNowStatus = " | ".join(freeNowList)   
+                    await self.bot.change_presence(status=discord.Status.online, activity=discord.Game(freeNowStatus))
                 
                     for endTimes in jsonAuto["data"]["Catalog"]["searchStore"]["elements"]:
                         if endTimes["title"] in freeNowAuto[0]:
@@ -81,13 +86,13 @@ class BackgroundTasks(commands.Cog):
                             gameDay = (gameDates[8:10])
 
                             #Determines if the Month value is single digit or multiple digits
-                            if int(gameDates[6]) == 0:
-                                gameMonth = int(gameDates[7])
+                            if int(gameDates[5]) == 0:
+                                gameMonth = int(gameDates[6])
                             else:
-                                gameMonth = int(gameDates[6:7])
+                                gameMonth = (gameDates[5]) + (gameDates[6])
 
                             #Changes the month int to the calender month
-                            gameMonthName = calendar.month_name[gameMonth]
+                            gameMonthName = calendar.month_name[int(gameMonth)]
                     
                             #Creates a string containing Month Day, Year
                             formatedDate = str(f"{gameMonthName} {gameDay}, {gameYear}")
@@ -103,7 +108,7 @@ class BackgroundTasks(commands.Cog):
                                 description = games["description"],
                             )
 
-                            messageFormat.set_author(name="Free On EpicGames[x]",url="https://store.epicgames.com/en-US/")
+                            messageFormat.set_author(name="Free On EpicGames[->]",url="https://store.epicgames.com/en-US/free-games")
                             messageFormat.add_field(name="",value="", inline=False)
                             messageFormat.add_field(name="Original Price:", value=games["price"]["totalPrice"]["fmtPrice"]["originalPrice"], inline=True)
                             messageFormat.add_field(name="Sale Ends:", value=formatedDate)
@@ -117,9 +122,10 @@ class BackgroundTasks(commands.Cog):
                     CHANNEL_ID = os.getenv("CHANNEL_ID")
                     message_channel = await self.bot.fetch_channel(CHANNEL_ID)
                     await message_channel.send("@everyone", embed=view._initial, view=view)
+                    print(f"\033[1m{current_time}\033[0m Update Message was sent")
 
                 else:
-                    async with aiofiles.open(freeNowFile, "w") as file:
+                    async with aiofiles.open(freeNowFile, "w+") as file:
                         for line in freeNowList:
                             await file.write(f"{line}\n")
                     print(f"\033[1m{current_time}\033[0m Site data was successfully dumped.")
@@ -136,7 +142,7 @@ class BackgroundTasks(commands.Cog):
                 freeGameJson = json.loads(responseText)
 
                 epicJson = "free_games.json"
-                async with aiofiles.open(epicJson, "w") as file:
+                async with aiofiles.open(epicJson, "w+") as file:
                     await file.write(json.dumps(freeGameJson, indent=4))
                     
                 current_time = time.strftime("%H:%M:%S", time.localtime())

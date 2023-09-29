@@ -1,7 +1,7 @@
 import discord, aiofiles, json, calendar
 from discord.ext import commands
 from discord import app_commands
-from discordviews import PaginationView
+from view import PaginationView
 
 class FreeGamesCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -23,13 +23,16 @@ class FreeGamesCog(commands.Cog):
                 gameYear = (gameDates[0:4])
                 gameDay = (gameDates[8:10])
 
-                if int(gameDates[6]) == 0:
-                    gameMonth = int(gameDates[7])
+                #Determines if the Month value is single digit or multiple digits
+                if int(gameDates[5]) == 0:
+                    gameMonth = int(gameDates[6])
                 else:
-                    gameMonth = int(gameDates[6:7])
+                    gameMonth = (gameDates[5]) + (gameDates[6])
 
-                gameMonthName = calendar.month_name[gameMonth]
+                #Changes the month int to the calender month
+                gameMonthName = calendar.month_name[int(gameMonth)]
         
+                #Creates a string containing Month Day, Year
                 formatedDate = str(f"{gameMonthName} {gameDay}, {gameYear}")
 
         messages_List = []
@@ -41,7 +44,7 @@ class FreeGamesCog(commands.Cog):
                     description = games["description"],
                 )
 
-                messageFormat.set_author(name="Free On EpicGames[x]",url="https://store.epicgames.com/en-US/")
+                messageFormat.set_author(name="Free On EpicGames[->]",url="https://store.epicgames.com/en-US/free-games")
                 messageFormat.add_field(name="",value="", inline=False)
                 messageFormat.add_field(name="Original Price:", value=games["price"]["totalPrice"]["fmtPrice"]["originalPrice"], inline=True)
                 messageFormat.add_field(name="Sale Ends:", value=formatedDate)

@@ -14,7 +14,7 @@ class HelpCog(commands.Cog):
         )
         commandList.set_author(name="Munchie Bot >^.^<")
         commandList.add_field(name="/help", value="See list of commands.", inline=False)
-        commandList.add_field(name="/freegame", value="See the latest free game on epic.", inline=False)
+        commandList.add_field(name="/freegame", value="See the latest free games.", inline=False)
         commandList.add_field(name="/global", value="@everyone to notify the whole server.", inline=False)
         await interaction.response.send_message(embed=commandList, ephemeral=True)
         

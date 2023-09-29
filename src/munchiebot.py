@@ -2,18 +2,17 @@
 import discord, os, aiofiles
 from dotenv import load_dotenv
 from consoleheader import logo_format, info_layout
-from discordviews import PersistentViewBot
+from view import ViewBot
 load_dotenv()
 logo_format()
 info_layout()
 
 TOKEN = os.getenv("TOKEN") #Add your own token here
 CHANNEL_ID = os.getenv("CHANNEL_ID")  #Add your own channel ID here
-bot = PersistentViewBot()
+bot = ViewBot()
 
-def run_bot():
-    @bot.event
-    async def on_ready():
+@bot.event
+async def on_ready():
         try:
                 print(f"\033[1m{bot.user}\033[0m has connected to Discord!")
                 synced = await bot.tree.sync()
@@ -26,4 +25,4 @@ def run_bot():
         except Exception as e:
                 print(e)
 
-    bot.run(TOKEN)
+bot.run(TOKEN)
