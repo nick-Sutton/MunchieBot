@@ -1,5 +1,4 @@
 import discord
-from discord.ext import commands
 from typing import List
 from collections import deque
 
@@ -48,14 +47,3 @@ class PaginationView(discord.ui.View):
         @property
         def initial(self) -> discord.Embed:
             return self._initial
-        
-class ViewBot(commands.Bot):
-    def __init__(self):
-        intents = discord.Intents().all()
-        intents.message_content = True
-        super().__init__(command_prefix=commands.when_mentioned_or('!'), intents=intents)
-        self.cogs_List = ["cogs.freegamesCog", "cogs.globalCog", "cogs.helpCog", "epicSC"]
-
-    async def setup_hook(self) -> None:
-        for ext in self.cogs_List:
-            await self.load_extension(ext)
