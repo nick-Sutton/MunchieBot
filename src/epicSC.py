@@ -1,5 +1,6 @@
+from settings import *
 from playwright.async_api import async_playwright
-import json, aiohttp, aiofiles, os, calendar, discord, time
+import json, aiohttp, aiofiles, calendar, discord, time
 from discord.ext import commands, tasks
 from view import PaginationView
 
@@ -55,13 +56,14 @@ class BackgroundTasks(commands.Cog):
             current_time = time.strftime("%H:%M:%S", time.localtime())
             print(f"\033[1m{current_time}\033[0m freeNowList and comingSoonList lists were successfully created.")
 
-            freeNowFile = os.getcwd() + "/freeNow.txt"
-            await aiofiles.open(freeNowFile, "w")
+            #freeNowFile = os.getcwd() + "/freeNow.txt"
+            #await aiofiles.open(freeNowFile, "w")
+            freeNowFile = "freeNow.txt"
 
             async with aiofiles.open(freeNowFile, "r") as file:
                 freeNowtxt = [line.strip() for line in await file.readlines()]
                 if freeNowtxt != freeNowList:
-                    async with aiofiles.open(freeNowFile, "w+") as file:
+                    async with aiofiles.open(freeNowFile, "w") as file:
                             for line in freeNowList:
                                 await file.write(f"{line}\n")
                     print(f"\033[1m{current_time}\033[0m Site data has changed.")
@@ -119,13 +121,12 @@ class BackgroundTasks(commands.Cog):
                     embeds = messages_List
                     view = PaginationView(embeds)
 
-                    CHANNEL_ID = os.getenv("CHANNEL_ID")
                     message_channel = await self.bot.fetch_channel(CHANNEL_ID)
                     await message_channel.send("@everyone", embed=view._initial, view=view)
                     print(f"\033[1m{current_time}\033[0m Update Message was sent")
 
                 else:
-                    async with aiofiles.open(freeNowFile, "w+") as file:
+                    async with aiofiles.open(freeNowFile, "w") as file:
                         for line in freeNowList:
                             await file.write(f"{line}\n")
                     print(f"\033[1m{current_time}\033[0m Site data was successfully dumped.")
