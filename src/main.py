@@ -19,6 +19,7 @@ class Bot(commands.Bot):
             print(f"\033[1m{self.user}\033[0m has connected to Discord!")
             synced = await self.tree.sync()
             print(f"synced {len(synced)} command(s)")
+            await aiofiles.open("freeNow.txt", "a")
             async with aiofiles.open("freeNow.txt", "r") as file:
                   freeNowList = [line.strip() for line in await file.readlines()]
             

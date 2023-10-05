@@ -56,8 +56,6 @@ class BackgroundTasks(commands.Cog):
             current_time = time.strftime("%H:%M:%S", time.localtime())
             print(f"\033[1m{current_time}\033[0m freeNowList and comingSoonList lists were successfully created.")
 
-            #freeNowFile = os.getcwd() + "/freeNow.txt"
-            #await aiofiles.open(freeNowFile, "w")
             freeNowFile = "freeNow.txt"
 
             async with aiofiles.open(freeNowFile, "r") as file:
@@ -69,7 +67,7 @@ class BackgroundTasks(commands.Cog):
                     print(f"\033[1m{current_time}\033[0m Site data has changed.")
                     print(f"\033[1m{current_time}\033[0m Site data was successfully dumped.")
 
-                    async with aiofiles.open("freeNow.txt", "r") as file:
+                    async with aiofiles.open(freeNowFile, "r") as file:
                         freeNowAuto = [line.strip() for line in await file.readlines()]
                         print(freeNowList)
 
