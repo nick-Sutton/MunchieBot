@@ -4,5 +4,3 @@ To use the bot, add a token and channel ID in the settings.py file found in the 
 
 # Sample Implementation
 ![mbPreview](https://github.com/nick-Sutton/MunchieBot/assets/136986806/bc90dc81-69ef-4f27-ac07-8923d8990252)
-
-[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=nick-sutton&repo=MunchieBot&theme=dracula)](https://github.com/anuraghazra/github-readme-stats)
