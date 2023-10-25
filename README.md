@@ -1,3 +1,4 @@
+![Munchie_banner](https://github.com/nick-Sutton/MunchieBot/assets/136986806/b8df3163-b259-4564-9363-0ea3d194a4ef)
 # MunchieBot
 MunchieBot uses PlayWright and the discord.py API to asynchronously scrape the Epic Games Store and update your server when a new free game is available.
 To use the bot, add a token and channel ID in the settings.py file found in the src folder.
