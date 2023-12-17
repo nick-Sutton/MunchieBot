@@ -53,7 +53,7 @@ class GlobalCog(commands.Cog):
                 messageFormat.add_field(name="",value="", inline=False)
                 messageFormat.add_field(name="Original Price:", value=games["price"]["totalPrice"]["fmtPrice"]["originalPrice"], inline=True)
                 messageFormat.add_field(name="Sale Ends:", value=formatedDate)
-                messageFormat.set_thumbnail(url=games["keyImages"][2]["url"])
+                messageFormat.set_thumbnail(url=games["keyImages"][0]["url"])
 
                 messages_List.append(messageFormat)
 
