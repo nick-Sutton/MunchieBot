@@ -24,7 +24,7 @@ class BackgroundTasks(commands.Cog):
                 time.sleep(5)
                 await page.wait_for_selector("data-testid=group-swiper-slider-titlebar")
                 
-                freeGameSection = page.locator("xpath=//*[contains(@class, 'css-2u323')]")
+                freeGameSection = page.locator("xpath=//*[contains(@class, 'css-1myhtyb')]")
                 titlesList =  []
                 statusList =  []
                 gameDict =  {}
@@ -34,9 +34,9 @@ class BackgroundTasks(commands.Cog):
                     titles = await freeGameSection.locator("data-testid=direction-auto").nth(i).text_content()
                     titlesList.append(titles)
 
-                freeGameStatus = await freeGameSection.locator("div[class=css-1avc5a3]").count()
+                freeGameStatus = await freeGameSection.locator("div[class=css-11xvn05]").count() #1avc5a3
                 for i in range(freeGameStatus):
-                    status = await freeGameSection.locator("div[class=css-1avc5a3]").nth(i).text_content()
+                    status = await freeGameSection.locator("div[class=css-11xvn05]").nth(i).text_content()
                     statusList.append(status)
 
                 await browser.close()
@@ -69,7 +69,8 @@ class BackgroundTasks(commands.Cog):
 
                     async with aiofiles.open(freeNowFile, "r") as file:
                         freeNowAuto = [line.strip() for line in await file.readlines()]
-                        print(freeNowList)
+                    print(freeNowList)
+                    print(statusList)
 
                     async with aiofiles.open("free_games.json", "r") as file:
                         getData = await file.read()
@@ -112,7 +113,7 @@ class BackgroundTasks(commands.Cog):
                             messageFormat.add_field(name="",value="", inline=False)
                             messageFormat.add_field(name="Original Price:", value=games["price"]["totalPrice"]["fmtPrice"]["originalPrice"], inline=True)
                             messageFormat.add_field(name="Sale Ends:", value=formatedDate)
-                            messageFormat.set_thumbnail(url=games["keyImages"][2]["url"])
+                            messageFormat.set_thumbnail(url=games["keyImages"][0]["url"])
 
                             messages_List.append(messageFormat)
 
